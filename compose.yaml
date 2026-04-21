@@ -1,0 +1,103 @@
+services:
+    test123:
+        build:
+            context: .
+            dockerfile: Dockerfile
+        image: test123
+        container_name: test123
+        restart: unless-stopped
+        working_dir: /var/www/
+        volumes:
+            #   - /home/webserver/systems/Performance-Evaluation/Smct-Eval-server/.env:/var/www/.env
+            - ./:/var/www
+            - ./default.conf:/etc/nginx/nginx.conf
+
+        networks:
+            - performance
+        environment:
+            DB_CONNECTION: mysql
+            DB_HOST: host.docker.internal
+            DB_PORT: 3306
+            DB_DATABASE: event
+            DB_USERNAME: root
+            DB_PASSWORD:
+        # command: php artisan queue:listen --tries=1
+
+    test123-nginx:
+        image: nginx:alpine
+        container_name: test123-nginx
+        restart: unless-stopped
+        # work_dir: /var/www
+        ports:
+            - 9001:9001
+        volumes:
+            - ./default.conf:/etc/nginx/nginx.conf
+            - ./:/var/www
+
+        networks:
+            - performance
+    # test123-mysql:
+    #     image: mysql:s
+    #     container_name: test1234-nginx
+    #     restart: unless-stopped
+    #     # work_dir: /var/www
+    #     ports:
+    #         - 9002:9002
+    #     volumes:
+    #         - ./default.conf:/etc/nginx/nginx.conf
+    #         - ./:/var/www
+
+    #     networks:
+    #         - performance
+
+    # test123-phpMyAdmin:
+    #     image: mysql:s
+    #     container_name: test1234-nginx
+    #     restart: unless-stopped
+    #     # work_dir: /var/www
+    #     ports:
+    #         - 9002:9002
+    #     volumes:
+    #         - ./default.conf:/etc/nginx/nginx.conf
+    #         - ./:/var/www
+
+    #     networks:
+    #         - performance
+
+    # performance-reverb:
+    #   build:
+    #     context: ./
+    #     dockerfile: Dockerfile-reverb
+    #   ports:
+    #     - "8085:8085" # expose Reverb server
+    #   environment:
+    #     - APP_URL=${APP_URL}
+    #     - LARAVEL_REVERB_APP_KEY=${REVERB_APP_KEY}
+    #     - LARAVEL_REVERB_APP_SECRET=${REVERB_APP_SECRET}
+    #   depends_on:
+    #     - performance-server
+    #   restart: unless-stopped
+    #   container_name: performance-reverb
+
+    #   networks:
+    #     - performance
+
+    # performance-worker:
+    #   image: performance-server
+    #   container_name: performance-server-worker
+    #   working_dir: /var/www/
+    #   depends_on:
+    #     - performance-server
+    #   command: php artisan queue:work --tries=3
+    #   volumes:
+    #     - ./storage:/var/www/storage
+    #     - ./bootstrap/cache:/var/www/bootstrap/cache
+    #     - /home/webserver/systems/Performance-Evaluation/Smct-Eval-server/.env:/var/www/.env
+    #     - ./:/var/www
+    #   networks:
+    #     - performance
+    #   restart: unless-stopped
+
+networks:
+    performance:
+        driver: bridge
